@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Exception;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 use Illuminate\Http\Request;
 use App\Models\BookModel;
 
@@ -38,9 +39,19 @@ class BookController extends Controller
     {
         $data = $request->all();
         $validator = Validator::make($data, [ 
-            'title' => 'required|max:255|unique:books',
-            'author' => 'required|max:255',
-            'cover_img' => 'required|image'
+            'title' => [
+                'required',
+                'max:255',
+                Rule::unique('books')->where('author', $data['author'])
+            ],
+            'author' => [
+                'required',
+                'max:255'
+            ],
+            'cover_img' => [
+                'required',
+                'image'
+            ]
         ]);
         if ($validator->fails()) {
           return response()->json($validator->errors(), 422);
@@ -87,16 +98,29 @@ class BookController extends Controller
     {
         $data = $request->all();
         unset($data['_method']);
+        if ($data['cover_img'] === 'undefined') {
+            unset($data['cover_img']);
+        }
         $validator = Validator::make($data, [ 
-            'title' => 'required|max:255|unique:books',
-            'author' => 'required|max:255'
+            'title' => [
+                'required',
+                'max:255',
+                Rule::unique('books')->where('author', $data['author'])
+            ],
+            'author' => [
+                'required',
+                'max:255'
+            ],
+            'cover_img' => [
+                'sometimes',
+                'image'
+            ]
         ]);
         if ($validator->fails()) {
           return response()->json($validator->errors(), 422);
         }
 
         try {
-            unset($data['cover_img']);
             if ($request->file('cover_img') !== null) {
                 $img = $request->file('cover_img');
                 $data['cover_img'] = $img->store('images', ['disk' => 'uploads']);

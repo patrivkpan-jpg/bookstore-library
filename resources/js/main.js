@@ -48,7 +48,7 @@ const Main = {
             Main.deleteBook($(this).data('id'))
         })
         $('#updateBookSaveBtn').click(function () {
-            Main.updateBook($(this).data('id'));
+            Main.updateBook($(this).attr('data-id'));
         })
     },
 
@@ -174,6 +174,7 @@ const Main = {
      * @param {*} element 
      */
     showUpdateBook : function (element) {
+        $(`#updateBookCoverInput`).val('')
         const title = element.siblings('h5').first().text();
         const author = element.siblings('p').first().text();
         $('#updateBookTitleInput').val(title);
